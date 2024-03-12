@@ -1,0 +1,91 @@
+[gd_scene load_steps=3 format=3 uid="uid://me50cjwtgc3h"]
+
+[ext_resource type="PackedScene" uid="uid://dl8qr22oxvnxp" path="res://devel/spin_sprite.tscn" id="1_uxhuc"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_kmt44"]
+font_size = 24
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NetworkSync" type="NetworkSync" parent="." node_paths=PackedStringArray("content")]
+content = NodePath("../Panel/DiscoveredPeers/ScrollContainer/Content")
+
+[node name="SpinSprite" parent="." instance=ExtResource("1_uxhuc")]
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DiscoveredPeers" type="VBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Panel/DiscoveredPeers"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+text = "Discovered Peers"
+label_settings = SubResource("LabelSettings_kmt44")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel/DiscoveredPeers"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Content" type="VBoxContainer" parent="Panel/DiscoveredPeers/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DialablePeer" type="Panel" parent="Panel/DiscoveredPeers/ScrollContainer/Content"]
+visible = false
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/DiscoveredPeers/ScrollContainer/Content/DialablePeer"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PeerID" type="Label" parent="Panel/DiscoveredPeers/ScrollContainer/Content/DialablePeer/HBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(128, 0)
+layout_mode = 2
+text = "PeerIdPeerIdPeerIdPeerId"
+text_overrun_behavior = 3
+
+[node name="Multiaddr" type="Label" parent="Panel/DiscoveredPeers/ScrollContainer/Content/DialablePeer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "/ip4/0.0.0.0/tcp/0"
+clip_text = true
+
+[node name="DialButton" type="Button" parent="Panel/DiscoveredPeers/ScrollContainer/Content/DialablePeer/HBoxContainer"]
+layout_mode = 2
+text = "Dial Peer"

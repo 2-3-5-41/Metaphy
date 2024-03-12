@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://dl8qr22oxvnxp"]
+
+[ext_resource type="Texture2D" uid="uid://dmetnwimvaqkk" path="res://icon.svg" id="1_k20k8"]
+[ext_resource type="Script" path="res://devel/scripts/SpinSprite.gd" id="2_48h0k"]
+
+[node name="SpinSprite" type="Sprite2D"]
+position = Vector2(128, 128)
+texture = ExtResource("1_k20k8")
+script = ExtResource("2_48h0k")
