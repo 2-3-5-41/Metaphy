@@ -8,11 +8,9 @@ edition = "2021"
 [lib]
 crate-type = ["lib", "cdylib"]
 
+[features]
+
 [dependencies]
-godot = { git = "https://github.com/godot-rust/gdext", branch = "master", features = ["experimental-threads"] }
-metaphy_network = { path = "../MetaphyNetwork", features = ["user"] }
-tokio = { version = "*", features = ["full", "rt"] }
+godot = { git = "https://github.com/godot-rust/gdext", branch = "master"}
+tokio = { version = "*", features = ["net", "rt-multi-thread", "io-util"] }
 futures = "0.3.30"
-# log = "0.4.21"
-# env_logger = "0.11.3"
-# tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }

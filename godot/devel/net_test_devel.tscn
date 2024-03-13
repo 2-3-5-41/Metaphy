@@ -13,9 +13,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="NetworkSync" type="NetworkSync" parent="." node_paths=PackedStringArray("content")]
-content = NodePath("../Panel/DiscoveredPeers/ScrollContainer/Content")
-
 [node name="SpinSprite" parent="." instance=ExtResource("1_uxhuc")]
 
 [node name="Panel" type="Panel" parent="."]
@@ -89,3 +86,5 @@ clip_text = true
 [node name="DialButton" type="Button" parent="Panel/DiscoveredPeers/ScrollContainer/Content/DialablePeer/HBoxContainer"]
 layout_mode = 2
 text = "Dial Peer"
+
+[node name="NetowrkEventServer" type="NetowrkEventServer" parent="."]
