@@ -11,6 +11,6 @@ crate-type = ["lib", "cdylib"]
 [features]
 
 [dependencies]
-godot = { git = "https://github.com/godot-rust/gdext", branch = "master"}
-tokio = { version = "*", features = ["net", "rt-multi-thread", "io-util"] }
+godot = { git = "https://github.com/godot-rust/gdext", branch = "master" }
+tokio = { version = "*", features = ["rt-multi-thread", "sync"] }
 futures = "0.3.30"

@@ -87,4 +87,4 @@ clip_text = true
 layout_mode = 2
 text = "Dial Peer"
 
-[node name="NetowrkEventServer" type="NetowrkEventServer" parent="."]
+[node name="TokioThreadCommunicationTest" type="TokioThreadCommunicationTest" parent="."]
