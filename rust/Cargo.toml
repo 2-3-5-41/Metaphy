@@ -11,10 +11,23 @@ crate-type = ["lib", "cdylib"]
 [features]
 
 [dependencies]
-metaphy_network = { path = "../MetaphyNetwork", features = ["user"] }
-godot = { git = "https://github.com/godot-rust/gdext", branch = "master"}
-tokio = { version = "*", features = ["rt-multi-thread", "sync"] }
-futures = "0.3.30"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
-log = "0.4.21"
 env_logger = "0.11.3"
+futures = "0.3.30"
+godot = { git = "https://github.com/godot-rust/gdext", branch = "master"}
+libp2p = { version = "0.53.2", features = [
+    "tokio",
+    "tcp",
+    "quic",
+    "noise",
+    "yamux",
+    "identify",
+    "ping",
+    "mdns",
+    "relay",
+    "dcutr",
+    "rendezvous",
+    "kad",
+] }
+log = "0.4.21"
+tokio = { version = "*", features = ["rt-multi-thread", "sync", "macros"] }
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
