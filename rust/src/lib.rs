@@ -81,13 +81,13 @@ impl TokioRuntimeServer {
 
 #[derive(GodotClass)]
 #[class(base=Node)]
-pub struct NetTest {
+pub struct Phylosopher {
     base: Base<Node>,
     channel: Option<(Sender<NetworkCommand>, Receiver<NetworkEvent>)>,
 }
 
 #[godot_api]
-impl INode for NetTest {
+impl INode for Phylosopher {
     fn init(base: Base<Node>) -> Self {
         Self {
             base,
@@ -202,7 +202,7 @@ impl INode for NetTest {
 }
 
 #[godot_api]
-impl NetTest {}
+impl Phylosopher {}
 
 #[derive(Debug)]
 pub enum NetworkEvent {
