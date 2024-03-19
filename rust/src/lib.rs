@@ -1,6 +1,9 @@
 use futures::StreamExt;
 use godot::{engine::Engine, prelude::*};
-use libp2p::{mdns, noise, tcp, yamux, Multiaddr};
+use libp2p::{
+    dcutr, identify, mdns, noise, ping, relay, rendezvous, swarm::NetworkBehaviour, tcp, yamux,
+    Multiaddr,
+};
 use std::{borrow::BorrowMut, rc::Rc, time::Duration};
 use tokio::{
     runtime::{self, Runtime},
@@ -123,9 +126,14 @@ impl INode for Phylosopher {
                 )
                 .unwrap()
                 .with_quic()
-                .with_behaviour(|key| {
-                    mdns::tokio::Behaviour::new(mdns::Config::default(), key.public().to_peer_id())
-                        .unwrap()
+                .with_relay_client(noise::Config::new, yamux::Config::default).unwrap()
+                .with_behaviour(|key, relay| Metaphysics {
+                    dcutr: dcutr::Behaviour::new(key.public().to_peer_id()),
+                    identify: identify::Behaviour::new(identify::Config::new("/MetaphyNetwork/0.1.0".into(), key.public())),
+                    mdns: mdns::tokio::Behaviour::new(mdns::Config::default(), key.public().to_peer_id()).unwrap(),
+                    ping: ping::Behaviour::new(ping::Config::default()),
+                    relay,
+                    rendezvous: rendezvous::client::Behaviour::new(key.to_owned())
                 })
                 .unwrap()
                 .with_swarm_config(|conf| {
@@ -134,12 +142,14 @@ impl INode for Phylosopher {
                 .build()
             );
 
+            swarm.lock().await.borrow_mut().listen_on("/ip4/0.0.0.0/tcp/0".parse().unwrap()).unwrap();
+
             loop {
                 select! {
                     event = async {
                         swarm.lock().await.borrow_mut().select_next_some().await
                     } => match event {
-                        libp2p::swarm::SwarmEvent::Behaviour(event) => match event_send.send(NetworkEvent::Mdns(event)).await {
+                        libp2p::swarm::SwarmEvent::Behaviour(event) => match event_send.send(event).await {
                             Ok(_) => (),
                             Err(err) => println!("[ Network Event Sender Error ] -> {err:?}"),
                         },
@@ -152,7 +162,7 @@ impl INode for Phylosopher {
                         // libp2p::swarm::SwarmEvent::ExpiredListenAddr { listener_id, address } => todo!(),
                         // libp2p::swarm::SwarmEvent::ListenerClosed { listener_id, addresses, reason } => todo!(),
                         // libp2p::swarm::SwarmEvent::ListenerError { listener_id, error } => todo!(),
-                        libp2p::swarm::SwarmEvent::Dialing { peer_id, connection_id } => println!("[ Libp2p | Dialing... ] -> {peer_id:?}, {connection_id:?}"),
+                        // libp2p::swarm::SwarmEvent::Dialing { peer_id, connection_id } => todo!(),
                         // libp2p::swarm::SwarmEvent::NewExternalAddrCandidate { address } => todo!(),
                         // libp2p::swarm::SwarmEvent::ExternalAddrConfirmed { address } => todo!(),
                         // libp2p::swarm::SwarmEvent::ExternalAddrExpired { address } => todo!(),
@@ -179,17 +189,12 @@ impl INode for Phylosopher {
         let (send, recv) = self.channel.as_mut().unwrap();
         match recv.try_recv() {
             Ok(message) => match message {
-                NetworkEvent::Mdns(e) => match e {
-                    mdns::Event::Discovered(discovery) => {
-                        discovery.into_iter().for_each(|(_peer, addr)| {
-                            match send.try_send(NetworkCommand::Dial(addr)) {
-                                Ok(_) => (),
-                                Err(err) => godot_error!("{err:?}"),
-                            }
-                        })
-                    }
-                    mdns::Event::Expired(_) => (),
-                },
+                NetworkEvent::Dcutr(e) => println!("[ Network Event ] -> {e:?}"),
+                NetworkEvent::Identify(e) => println!("[ Network Event ] -> {e:?}"),
+                NetworkEvent::Mdns(e) => println!("[ Network Event ] -> {e:?}"),
+                NetworkEvent::Ping(e) => println!("[ Network Event ] -> {e:?}"),
+                NetworkEvent::Relay(e) => println!("[ Network Event ] -> {e:?}"),
+                NetworkEvent::Rzv(e) => println!("[ Network Event ] -> {e:?}"),
             },
             Err(err) => match err {
                 tokio::sync::mpsc::error::TryRecvError::Empty => (),
@@ -204,9 +209,61 @@ impl INode for Phylosopher {
 #[godot_api]
 impl Phylosopher {}
 
+#[derive(NetworkBehaviour)]
+#[behaviour(to_swarm = "NetworkEvent")]
+pub struct Metaphysics {
+    dcutr: dcutr::Behaviour,
+    identify: identify::Behaviour,
+    mdns: mdns::tokio::Behaviour,
+    ping: ping::Behaviour,
+    relay: relay::client::Behaviour,
+    rendezvous: rendezvous::client::Behaviour,
+}
+
 #[derive(Debug)]
 pub enum NetworkEvent {
+    Dcutr(dcutr::Event),
+    Identify(identify::Event),
     Mdns(mdns::Event),
+    Ping(ping::Event),
+    Relay(relay::client::Event),
+    Rzv(rendezvous::client::Event),
+}
+
+impl From<dcutr::Event> for NetworkEvent {
+    fn from(value: dcutr::Event) -> Self {
+        Self::Dcutr(value)
+    }
+}
+
+impl From<identify::Event> for NetworkEvent {
+    fn from(value: identify::Event) -> Self {
+        Self::Identify(value)
+    }
+}
+
+impl From<mdns::Event> for NetworkEvent {
+    fn from(value: mdns::Event) -> Self {
+        Self::Mdns(value)
+    }
+}
+
+impl From<ping::Event> for NetworkEvent {
+    fn from(value: ping::Event) -> Self {
+        Self::Ping(value)
+    }
+}
+
+impl From<relay::client::Event> for NetworkEvent {
+    fn from(value: relay::client::Event) -> Self {
+        Self::Relay(value)
+    }
+}
+
+impl From<rendezvous::client::Event> for NetworkEvent {
+    fn from(value: rendezvous::client::Event) -> Self {
+        Self::Rzv(value)
+    }
 }
 
 #[derive(Debug)]
